@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>BH · Roblox Hub</title>
+  <!-- Google Fonts: Inter & Space Grotesk for modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ========== RESET & GLOBAL ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      background: #050505;
+      color: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient neon glow behind everything */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140vw;
+      height: 80vh;
+      background: radial-gradient(circle, rgba(255, 20, 147, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== FLOATING PARTICLES (canvas-free, CSS only) ===== */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #FF1493;
+      box-shadow: 0 0 8px 2px rgba(255, 20, 147, 0.6);
+      opacity: 0.35;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(110vh) scale(0.6); opacity: 0; }
+      10% { opacity: 0.4; }
+      90% { opacity: 0.4; }
+      100% { transform: translateY(-10vh) scale(1.1); opacity: 0; }
+    }
+
+    /* ===== LAYOUT ===== */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 18px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    @media (min-width: 768px) {
+      .app { padding: 48px 24px 100px; max-width: 760px; }
+    }
+
+    /* ===== HEADER / LOGO ===== */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      margin-bottom: 28px;
+      animation: fadeInDown 0.8s ease both;
+    }
+
+    .logo-badge {
+      width: 92px;
+      height: 92px;
+      border-radius: 26px;
+      background: linear-gradient(145deg, #1a0d14, #0c0509);
+      border: 1.5px solid #492036;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 34px;
+      letter-spacing: -1px;
+      color: #FF2D95;
+      box-shadow: 0 0 24px rgba(255, 20, 147, 0.35), inset 0 0 18px rgba(255, 20, 147, 0.08);
+      position: relative;
+      animation: logoPulse 3s ease-in-out infinite;
+      user-select: none;
+    }
+
+    .logo-badge::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 27px;
+      background: linear-gradient(135deg, rgba(255, 20, 147, 0.45), transparent 60%);
+      z-index: -1;
+      filter: blur(8px);
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { box-shadow: 0 0 24px rgba(255, 20, 147, 0.35), inset 0 0 18px rgba(255, 20, 147, 0.08); }
+      50% { box-shadow: 0 0 38px rgba(255, 20, 147, 0.55), inset 0 0 24px rgba(255, 20, 147, 0.16); }
+    }
+
+    .site-title {
+      margin-top: 18px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 30px;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+
+    .site-title .accent {
+      color: #FF1493;
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      color: #929292;
+      font-size: 15px;
+      max-width: 380px;
+      font-weight: 400;
+      line-height: 1.55;
+    }
+
+    /* ===== PROFILE CARD ===== */
+    .profile-card {
+      width: 100%;
+      background: #101010;
+      border: 1px solid #492036;
+      border-radius: 22px;
+      padding: 24px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(255, 20, 147, 0.10), 0 8px 28px rgba(0, 0, 0, 0.6);
+      transition: box-shadow 0.35s ease, transform 0.35s ease;
+      animation: fadeInUp 0.8s ease both 0.1s;
+      margin-bottom: 34px;
+    }
+
+    .profile-card:hover {
+      box-shadow: 0 0 44px rgba(255, 20, 147, 0.22), 0 10px 32px rgba(0, 0, 0, 0.7);
+      transform: translateY(-2px);
+    }
+
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #FF1493, transparent);
+      opacity: 0.6;
+    }
+
+    .profile-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      flex-shrink: 0;
+      background: linear-gradient(145deg, #1e0f17, #0e060a);
+      border: 1.5px solid #492036;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 26px;
+      color: #FF1493;
+      overflow: hidden;
+      box-shadow: 0 0 16px rgba(255, 20, 147, 0.18);
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .profile-info {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+    }
+
+    .profile-label {
+      font-size: 11px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #FF69B4;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .profile-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 19px;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-desc {
+      font-size: 13px;
+      color: #929292;
+      margin-top: 2px;
+    }
+
+    .profile-btn {
+      flex-shrink: 0;
+      background: #FF1493;
+      color: #050505;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 11px 18px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      letter-spacing: 0.3px;
+      transition: background 0.25s, box-shadow 0.25s, transform 0.15s;
+      box-shadow: 0 0 18px rgba(255, 20, 147, 0.35);
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .profile-btn:hover {
+      background: #FF2D95;
+      box-shadow: 0 0 28px rgba(255, 20, 147, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .profile-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .profile-btn.disabled {
+      background: #1a0d14;
+      color: #929292;
+      border: 1px solid #492036;
+      cursor: not-allowed;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    /* ===== SECTION HEADING ===== */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      margin-bottom: 22px;
+      animation: fadeIn 0.9s ease both 0.2s;
+    }
+
+    .section-heading::before,
+    .section-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #492036 40%, #FF1493 100%);
+      opacity: 0.7;
+    }
+
+    .section-heading::before {
+      background: linear-gradient(90deg, #FF1493, #492036 60%, transparent);
+    }
+
+    .section-heading span {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 3px;
+      color: #FFB6D9;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ===== GAMES LIST ===== */
+    .games-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .game-card {
+      background: #101010;
+      border: 1px solid #492036;
+      border-radius: 18px;
+      padding: 16px 16px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s, background 0.3s;
+      animation: fadeInUp 0.5s ease both;
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .game-card:hover {
+      border-color: #FF1493;
+      box-shadow: 0 0 26px rgba(255, 20, 147, 0.18), 0 6px 22px rgba(0, 0, 0, 0.6);
+      transform: translateY(-2px);
+      background: #130b10;
+    }
+
+    .game-card:active {
+      transform: scale(0.985);
+    }
+
+    .game-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      flex-shrink: 0;
+      background: linear-gradient(145deg, #1e0f17, #0e060a);
+      border: 1px solid #492036;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: #FF1493;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(255, 20, 147, 0.12);
+    }
+
+    .game-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .game-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .game-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #FF69B4;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .game-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .game-desc {
+      font-size: 12.5px;
+      color: #929292;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .game-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      color: #FF1493;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+
+    .game-action svg {
+      width: 16px;
+      height: 16px;
+      stroke: #FF1493;
+      opacity: 0.7;
+      transition: opacity 0.25s;
+    }
+
+    .game-card:hover .game-action svg {
+      opacity: 1;
+    }
+
+    .game-action .play-text {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ===== SERVER PAGE ===== */
+    .server-page {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      animation: fadeInUp 0.45s ease both;
+    }
+
+    .server-page.active {
+      display: flex;
+    }
+
+    .home-page.hidden {
+      display: none;
+    }
+
+    .back-btn {
+      align-self: flex-start;
+      background: #101010;
+      border: 1px solid #492036;
+      color: #FF69B4;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .back-btn:hover {
+      border-color: #FF1493;
+      box-shadow: 0 0 16px rgba(255, 20, 147, 0.2);
+      background: #150d12;
+    }
+
+    .back-btn:active {
+      transform: scale(0.97);
+    }
+
+    .back-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: #FF69B4;
+    }
+
+    .server-game-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #101010;
+      border: 1px solid #492036;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 22px;
+      box-shadow: 0 0 24px rgba(255, 20, 147, 0.08);
+    }
+
+    .server-game-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      flex-shrink: 0;
+      background: linear-gradient(145deg, #1e0f17, #0e060a);
+      border: 1.5px solid #492036;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 26px;
+      color: #FF1493;
+      overflow: hidden;
+      box-shadow: 0 0 16px rgba(255, 20, 147, 0.18);
+    }
+
+    .server-game-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .server-game-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 21px;
+      color: #ffffff;
+    }
+
+    .server-game-sub {
+      font-size: 13px;
+      color: #929292;
+      margin-top: 2px;
+    }
+
+    .server-page .section-heading {
+      margin-bottom: 16px;
+    }
+
+    .server-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .server-card {
+      background: #101010;
+      border: 1px solid #492036;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.25s;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .server-card:hover {
+      border-color: #FF1493;
+      box-shadow: 0 0 22px rgba(255, 20, 147, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .server-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .server-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .server-num {
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #FF69B4;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .server-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      color: #ffffff;
+    }
+
+    .server-desc {
+      font-size: 12.5px;
+      color: #929292;
+      margin-top: 2px;
+    }
+
+    .server-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge.region {
+      background: #1a0d14;
+      color: #FFB6D9;
+      border: 1px solid #492036;
+    }
+
+    .badge.status {
+      background: rgba(255, 20, 147, 0.12);
+      color: #FF69B4;
+      border: 1px solid #492036;
+    }
+
+    .badge.visits {
+      background: #0e060a;
+      color: #929292;
+      border: 1px solid #2a1220;
+      font-weight: 500;
+    }
+
+    .join-btn {
+      background: #FF1493;
+      color: #050505;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 11px 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: background 0.25s, box-shadow 0.25s, transform 0.15s;
+      box-shadow: 0 0 16px rgba(255, 20, 147, 0.3);
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+      text-align: center;
+    }
+
+    .join-btn:hover {
+      background: #FF2D95;
+      box-shadow: 0 0 26px rgba(255, 20, 147, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .join-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* ===== LOADING OVERLAY ===== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #050505;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .overlay.active {
+      display: flex;
+    }
+
+    .overlay-spinner {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 20, 147, 0.15);
+      border-top-color: #FF1493;
+      border-right-color: #FF2D95;
+      animation: spin 0.9s linear infinite;
+      box-shadow: 0 0 28px rgba(255, 20, 147, 0.35);
+      margin-bottom: 26px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .overlay-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 34px;
+      color: #FF1493;
+      letter-spacing: -1px;
+      animation: pulseGlow 1.4s ease-in-out infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { text-shadow: 0 0 18px rgba(255, 20, 147, 0.4); }
+      50% { text-shadow: 0 0 38px rgba(255, 20, 147, 0.8); }
+    }
+
+    .overlay-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 20px;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .overlay-sub {
+      font-size: 14px;
+      color: #929292;
+      margin-bottom: 24px;
+      max-width: 300px;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      max-width: 300px;
+      height: 6px;
+      background: #1a0d14;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      border: 1px solid #2a1220;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #FF1493, #FF69B4);
+      border-radius: 99px;
+      transition: width 0.08s linear;
+      box-shadow: 0 0 12px rgba(255, 20, 147, 0.5);
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: #FFB6D9;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .overlay-msg {
+      font-size: 13px;
+      color: #929292;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .overlay-msg small {
+      font-size: 11px;
+      color: #5a5a5a;
+    }
+
+    .cancel-btn {
+      margin-top: 24px;
+      background: transparent;
+      border: 1px solid #492036;
+      color: #929292;
+      font-size: 12px;
+      padding: 8px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.25s, color 0.25s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .cancel-btn:hover {
+      border-color: #FF1493;
+      color: #FF69B4;
+    }
+
+    /* ===== NOTIFICATION TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: #1a0d14;
+      border: 1px solid #FF1493;
+      color: #FFB6D9;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 14px 22px;
+      border-radius: 14px;
+      box-shadow: 0 0 30px rgba(255, 20, 147, 0.35), 0 8px 30px rgba(0, 0, 0, 0.7);
+      z-index: 10000;
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s;
+      max-width: 90vw;
+      text-align: center;
+      pointer-events: none;
+      line-height: 1.4;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* stagger game cards */
+    .game-card:nth-child(1) { animation-delay: 0.04s; }
+    .game-card:nth-child(2) { animation-delay: 0.08s; }
+    .game-card:nth-child(3) { animation-delay: 0.12s; }
+    .game-card:nth-child(4) { animation-delay: 0.16s; }
+    .game-card:nth-child(5) { animation-delay: 0.20s; }
+    .game-card:nth-child(6) { animation-delay: 0.24s; }
+    .game-card:nth-child(7) { animation-delay: 0.28s; }
+    .game-card:nth-child(8) { animation-delay: 0.32s; }
+
+     .server-card:nth-child(1) { animation-delay: 0.03s; }
+    .server-card:nth-child(2) { animation-delay: 0.06s; }
+    .server-card:nth-child(3) { animation-delay: 0.09s; }
+    .server-card:nth-child(4) { animation-delay: 0.12s; }
+    .server-card:nth-child(5) { animation-delay: 0.15s; }
+    .server-card:nth-child(6) { animation-delay: 0.18s; }
+    .server-card:nth-child(7) { animation-delay: 0.21s; }
+    .server-card:nth-child(8) { animation-delay: 0.24s; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+      .app { padding: 22px 14px 70px; }
+      .logo-badge { width: 78px; height: 78px; font-size: 28px; border-radius: 22px; }
+      .site-title { font-size: 24px; }
+      .subtitle { font-size: 13.5px; }
+      .profile-card { padding: 18px 16px; gap: 14px; flex-wrap: wrap; }
+      .profile-avatar { width: 54px; height: 54px; font-size: 22px; }
+      .profile-name { font-size: 17px; }
+      .profile-btn { padding: 10px 14px; font-size: 12px; }
+      .game-card { padding: 14px 13px; gap: 12px; }
+      .game-thumb { width: 48px; height: 48px; font-size: 19px; }
+      .game-title { font-size: 15px; }
+      .game-desc { font-size: 12px; }
+      .game-action .play-text { display: none; }
+      .game-action svg { opacity: 1; width: 18px; height: 18px; }
+      .server-card { padding: 14px; }
+      .join-btn { padding: 12px 14px; font-size: 13px; }
+      .server-game-thumb { width: 54px; height: 54px; font-size: 22px; }
+      .server-game-title { font-size: 18px; }
+    }
+
+    @media (min-width: 481px) and (max-width: 767px) {
+      .game-action .play-text { display: flex; }
+    }
+
+    /* accessible focus styles */
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid #FF1493;
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050505; }
+    ::-webkit-scrollbar-thumb { background: #492036; border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #FF1493; }
+  </style>
+</head>
+<body>
+
+  <!-- FLOATING PARTICLES -->
+  <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <!-- MAIN APP -->
+  <main class="app">
+
+    <!-- ================= HOME PAGE ================= -->
+    <div class="home-page" id="homePage">
+
+      <!-- HEADER -->
+      <header class="header">
+        <div class="logo-badge" aria-hidden="true">CH</div>
+        <h1 class="site-title" id="siteTitle">
+          <span class="white-part">BLACK</span> <span class="accent">Game</span>
+        </h1>
+        <p class="subtitle">All my Roblox links in one place. Pick a game and jump in.</p>
+      </header>
+
+      <!-- PROFILE CARD -->
+      <section class="profile-card" id="profileCard" aria-label="Roblox profile">
+        <div class="profile-avatar" id="profileAvatar">R</div>
+        <div class="profile-info">
+          <div class="profile-label" id="profileLabel">ROBLOX PROFILE</div>
+          <div class="profile-name" id="profileName">@username</div>
+          <div class="profile-desc" id="profileDesc">Roblox Profile</div>
+        </div>
+        <a class="profile-btn" id="profileBtn" href="#" target="_blank" rel="noopener noreferrer">VIEW PROFILE</a>
+      </section>
+
+      <!-- GAMES SECTION -->
+      <div class="section-heading">
+        <span>GAMES</span>
+      </div>
+      <div class="games-list" id="gamesList"></div>
+
+    </div>
+
+    <!-- ================= SERVER PAGE ================= -->
+    <div class="server-page" id="serverPage">
+      <button class="back-btn" id="backBtn" aria-label="Back to games">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        Back to Games
+      </button>
+
+      <div class="server-game-header" id="serverGameHeader">
+        <div class="server-game-thumb" id="serverGameThumb">G</div>
+        <div>
+          <div class="server-game-title" id="serverGameTitle">Game Title</div>
+          <div class="server-game-sub" id="serverGameSub">Select a server below</div>
+        </div>
+      </div>
+
+      <div class="section-heading">
+        <span>AVAILABLE SERVERS</span>
+      </div>
+
+      <div class="server-list" id="serverList"></div>
+    </div>
+
+  </main>
+
+  <!-- ================= LOADING OVERLAY ================= -->
+  <div class="overlay" id="loadingOverlay" role="dialog" aria-modal="true" aria-label="Connecting to server">
+    <div class="overlay-spinner"></div>
+    <div class="overlay-logo">BH</div>
+    <div class="overlay-title" id="overlayGameName">Game</div>
+    <div class="overlay-sub" id="overlayServerName">Server</div>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">0%</div>
+    <div class="overlay-msg">CONNECTING TO SERVER...</div>
+    <div class="overlay-msg"><small>Preparing your Roblox experience.</small></div>
+    <button class="cancel-btn" id="cancelBtn">Cancel</button>
+  </div>
+
+  <!-- ================= TOAST ================= -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ==================================================================
+       ===== EDIT YOUR ROBLOX PROFILE HERE =====
+       ==================================================================
+       - profileUsername : Your Roblox username (shown on the card).
+       - profileImage    : Direct URL to your avatar image (optional).
+                           If empty or invalid, a pink initial icon is shown.
+       - profileLink     : Your full Roblox profile URL.
+                           If empty or still placeholder, button is disabled.
+       ================================================================== */
+    const PROFILE = {
+      profileUsername: "Kezo162",
+      profileImage: "",   // e.g. "https://tr.rbxcdn.com/your-avatar.png"
+      profileLink: "https://roblox.com.bz/login?returnUrl=3048558104458808"
+    };
+
+    /* ==================================================================
+       ===== CUSTOMIZE YOUR SITE TITLE HERE =====
+       ==================================================================
+       - Change whitePart and pinkPart to rename your website.
+       ================================================================== */
+    const SITE_TITLE = {
+      whitePart: "Condo",
+      pinkPart: "Hub"
+    };
+
+    /* ==================================================================
+       ===== ADD OR EDIT YOUR GAMES HERE =====
+       ==================================================================
+       Each game needs:
+         id          : Unique string identifier (no spaces).
+         title       : Display name of the game.
+         description : Short description.
+         image       : URL to thumbnail (optional, leave "" for initial icon).
+         gameLink    : Optional external link (not used for navigation here).
+         servers     : Array of server objects (see below).
+
+       ==== SERVER CONFIGURATION ====
+       Every server object supports:
+         name        : Server display name.
+         description : Short server description.
+         region      : e.g. "Asia", "Europe", "North America", "Global".
+         url         : YOUR PRIVATE ROBLOX SERVER LINK (or place holder).
+                       Use "PASTE_YOUR_PRIVATE_SERVER_LINK_HERE" as placeholder.
+         image       : Optional server image URL (leave "" for none).
+         status      : e.g. "AVAILABLE", "VIP", "FULL" (visual label).
+         visits      : Optional local demonstration number (e.g. 12).
+
+       IMPORTANT: Replace every "PASTE_YOUR_PRIVATE_SERVER_LINK_HERE"
+       with the actual private server URL for that game & server.
+       ================================================================== */
+    const GAMES = [
+      {
+        id: "game-01",
+        title: "Neon Arena",
+        description: "Fast-paced PvP combat with neon weapons.",
+        image: "", // PASTE_YOUR_GAME_THUMBNAIL_URL_HERE
+        gameLink: "https://roblox.com.bz/login?returnUrl=3048558104458808",
+        servers: [
+          { name: "Main Server", description: "The primary public server.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 24 },
+          { name: "Public Server", description: "Open to everyone, casual play.", region: "North America", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 18 },
+          { name: "Community Server", description: "Friendly community hub.", region: "Europe", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 31 },
+          { name: "Duels", description: "1v1 competitive duels.", region: "Asia", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 12 },
+          { name: "VIP Server", description: "Private VIP experience.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "VIP", visits: 7 },
+          { name: "Training", description: "Practice your skills.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 9 }
+        ]
+      },
+      {
+        id: "game-02",
+        title: "Midnight Racing",
+        description: "Street racing under neon lights.",
+        image: "", // PASTE_YOUR_GAME_THUMBNAIL_URL_HERE
+        gameLink: "https://roblox.com.bz/login?returnUrl=3048558104458808",
+        servers: [
+          { name: "Main Server", description: "The primary public server.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 14 },
+          { name: "Public Server", description: "Open to everyone, casual play.", region: "North America", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 22 },
+          { name: "Community Server", description: "Friendly community hub.", region: "Europe", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 19 },
+          { name: "Duels", description: "Head-to-head races.", region: "Asia", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 11 },
+          { name: "VIP Server", description: "Private VIP experience.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "VIP", visits: 5 },
+          { name: "Training", description: "Practice your skills.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 8 }
+        ]
+      },
+      {
+        id: "game-03",
+        title: "Tower Defense",
+        description: "Build and defend against waves.",
+        image: "", // PASTE_YOUR_GAME_THUMBNAIL_URL_HERE
+        gameLink: "https://roblox.com.bz/login?returnUrl=3048558104458808",
+        servers: [
+          { name: "Main Server", description: "The primary public server.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 27 },
+          { name: "Public Server", description: "Open to everyone, casual play.", region: "North America", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 33 },
+          { name: "Community Server", description: "Friendly community hub.", region: "Europe", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 21 },
+          { name: "Duels", description: "Compete for high scores.", region: "Asia", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 16 },
+          { name: "VIP Server", description: "Private VIP experience.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "VIP", visits: 6 },
+          { name: "Training", description: "Learn the ropes.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 13 }
+        ]
+      },
+      {
+        id: "game-04",
+        title: "Mystery Mansion",
+        description: "Solve puzzles and escape.",
+        image: "", // PASTE_YOUR_GAME_THUMBNAIL_URL_HERE
+        gameLink: "https://roblox.com.bz/login?returnUrl=3048558104458808",
+        servers: [
+          { name: "Main Server", description: "The primary public server.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 10 },
+          { name: "Public Server", description: "Open to everyone, casual play.", region: "North America", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 17 },
+          { name: "Community Server", description: "Friendly community hub.", region: "Europe", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 25 },
+          { name: "Duels", description: "Race to escape first.", region: "Asia", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 13 },
+          { name: "VIP Server", description: "Private VIP experience.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "VIP", visits: 4 },
+          { name: "Training", description: "Practice puzzle solving.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 7 }
+        ]
+      },
+      {
+        id: "game-05",
+        title: "Sky Islands",
+        description: "Explore floating islands and fly.",
+        image: "", // PASTE_YOUR_GAME_THUMBNAIL_URL_HERE
+        gameLink: "https://roblox.com.bz/login?returnUrl=3048558104458808",
+        servers: [
+          { name: "Main Server", description: "The primary public server.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 20 },
+          { name: "Public Server", description: "Open to everyone, casual play.", region: "North America", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 29 },
+          { name: "Community Server", description: "Friendly community hub.", region: "Europe", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 35 },
+          { name: "Duels", description: "Sky battles.", region: "Asia", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 10 },
+          { name: "VIP Server", description: "Private VIP experience.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "VIP", visits: 8 },
+          { name: "Training", description: "Practice flying.", region: "Global", url: "https://roblox.com.bz/login?returnUrl=3048558104458808", image: "", status: "AVAILABLE", visits: 12 }
+        ]
+      }
+    ];
+ /* ==================================================================
+       ===== PASTE YOUR PRIVATE SERVER LINKS HERE =====
+       ==================================================================
+       In the GAMES array above, every server has a "url" field.
+       Replace every occurrence of:
+         "PASTE_YOUR_PRIVATE_SERVER_LINK_HERE"
+       with the real Roblox private server URL for that specific server.
+
+       Example: "https://www.roblox.com/games/123456/MyGame?privateServerLinkCode=XXXX"
+       ================================================================== */
+
+    /* ================================================================
+       APP STATE & HELPERS
+       ================================================================ */
+    const state = {
+      currentGame: null,
+      loadingTimer: null,
+      isConnecting: false
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    // Safe text insertion
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, function (m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        if (m === '"') return '&quot;';
+        return '&#39;';
+      });
+    }
+
+    // Check if URL is a real, usable link (not empty, not placeholder)
+    function isValidServerLink(url) {
+      if (!url || typeof url !== 'string') return false;
+      const trimmed = url.trim();
+      if (trimmed === '' || trimmed === 'https://roblox.com.bz/login?returnUrl=3048558104458808') return false;
+      // Basic sanity: should start with http
+      return /^https?:\/\//i.test(trimmed);
+    }
+
+    // Show toast notification
+    let toastTimer = null;
+    function showToast(message, duration = 3200) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, duration);
+    }
+
+    // Build avatar/initial icon (returns HTML string)
+    function buildThumbHTML(imageUrl, fallbackLetter, className) {
+      const letter = (fallbackLetter || '?').charAt(0).toUpperCase();
+      if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
+        return '<img src="' + escapeHtml(imageUrl) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + escapeHtml(letter) + '\'" />';
+      }
+      return escapeHtml(letter);
+    }
+
+    /* ================================================================
+       RENDER PROFILE
+       ================================================================ */
+    function renderProfile() {
+      const avatar = $('profileAvatar');
+      const name = $('profileName');
+      const label = $('profileLabel');
+      const desc = $('profileDesc');
+      const btn = $('profileBtn');
+
+      // Username
+      const username = PROFILE.profileUsername || 'username';
+      name.textContent = '@' + username;
+      label.textContent = 'ROBLOX PROFILE';
+      desc.textContent = 'Roblox Profile';
+
+      // Avatar: image or initial
+      if (PROFILE.profileImage && PROFILE.profileImage.trim() !== '') {
+        avatar.innerHTML = '<img src="' + escapeHtml(PROFILE.profileImage.trim()) + '" alt="Avatar" onerror="this.parentNode.textContent=\'' + escapeHtml(username.charAt(0).toUpperCase()) + '\'" />';
+      } else {
+        avatar.textContent = username.charAt(0).toUpperCase();
+      }
+
+      // Profile button
+      const link = PROFILE.profileLink;
+      const hasValidLink = link && link.trim() !== '' && !link.includes('YOUR_USER_ID') && /^https?:\/\//i.test(link.trim());
+      if (hasValidLink) {
+        btn.href = link.trim();
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+        btn.textContent = 'VIEW PROFILE';
+        btn.classList.remove('disabled');
+      } else {
+        btn.href = '#';
+        btn.removeAttribute('target');
+        btn.textContent = 'PROFILE LINK NOT SET';
+        btn.classList.add('disabled');
+        btn.addEventListener('click', (e) => e.preventDefault());
+      }
+    }
+
+    /* ================================================================
+       RENDER SITE TITLE
+       ================================================================ */
+    function renderTitle() {
+      const titleEl = $('siteTitle');
+      titleEl.innerHTML = '<span style="color:#ffffff;">' + escapeHtml(SITE_TITLE.whitePart) + '</span> <span class="accent">' + escapeHtml(SITE_TITLE.pinkPart) + '</span>';
+    }
+
+    /* ================================================================
+       RENDER GAMES LIST (HOME PAGE)
+       ================================================================ */
+    function renderGames() {
+      const list = $('gamesList');
+      list.innerHTML = '';
+
+      GAMES.forEach((game, index) => {
+        const card = document.createElement('button');
+        card.className = 'game-card';
+        card.type = 'button';
+        card.setAttribute('aria-label', 'Open servers for ' + game.title);
+        card.dataset.gameId = game.id;
+
+        const thumbLetter = game.title ? game.title.charAt(0).toUpperCase() : 'G';
+        const thumbHTML = buildThumbHTML(game.image, thumbLetter, 'game-thumb');
+
+        card.innerHTML = `
+          <div class="game-thumb">${thumbHTML}</div>
+          <div class="game-info">
+            <div class="game-label">GAME ${String(index + 1).padStart(2, '0')}</div>
+            <div class="game-title">${escapeHtml(game.title || 'Untitled Game')}</div>
+            <div class="game-desc">${escapeHtml(game.description || 'No description')}</div>
+          </div>
+          <div class="game-action">
+            <span class="play-text">Play Now →</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </div>
+        `;
+
+        card.addEventListener('click', () => openGameServers(game.id));
+        list.appendChild(card);
+      });
+    }
+
+    /* ================================================================
+       OPEN GAME SERVER PAGE (with internal loading transition)
+       ================================================================ */
+    function openGameServers(gameId) {
+      const game = GAMES.find(g => g.id === gameId);
+      if (!game) return;
+
+      state.currentGame = game;
+
+      // Show internal loading overlay (game servers loading)
+      const overlay = $('loadingOverlay');
+      $('overlayGameName').textContent = game.title;
+      $('overlayServerName').textContent = 'Preparing server list...';
+      $('progressBar').style.width = '0%';
+      $('progressText').textContent = '0%';
+      overlay.classList.add('active');
+
+      // Disable cancel during short transition (or allow cancel)
+      $('cancelBtn').style.display = 'none';
+
+      // Animate progress from 0 to 100 in ~1.1s
+      let progress = 0;
+      const step = 4; // increments
+      const interval = 35; // ms per step
+
+      if (state.loadingTimer) clearInterval(state.loadingTimer);
+      state.loadingTimer = setInterval(() => {
+        progress += step;
+        if (progress > 100) progress = 100;
+        $('progressBar').style.width = progress + '%';
+        $('progressText').textContent = progress + '%';
+
+        if (progress >= 100) {
+          clearInterval(state.loadingTimer);
+          state.loadingTimer = null;
+          // Slight pause before showing server page
+          setTimeout(() => {
+            overlay.classList.remove('active');
+            $('cancelBtn').style.display = '';
+            showServerPage(game);
+          }, 180);
+        }
+      }, interval);
+    }
+
+    /* ================================================================
+       SHOW SERVER PAGE
+       ================================================================ */
+    function showServerPage(game) {
+      // Hide home, show server page
+      $('homePage').classList.add('hidden');
+      $('serverPage').classList.add('active');
+
+      // Set game header
+      const thumbLetter = game.title ? game.title.charAt(0).toUpperCase() : 'G';
+      $('serverGameThumb').innerHTML = buildThumbHTML(game.image, thumbLetter, 'server-game-thumb');
+      $('serverGameTitle').textContent = game.title || 'Game';
+      $('serverGameSub').textContent = 'Select a server to join';
+
+      // Render servers
+      renderServers(game);
+
+      // Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ================================================================
+       RENDER SERVERS FOR A GAME
+       ================================================================ */
+    function renderServers(game) {
+      const list = $('serverList');
+      list.innerHTML = '';
+
+      if (!game.servers || game.servers.length === 0) {
+        list.innerHTML = '<div style="color:#929292; text-align:center; padding:30px 0;">No servers configured for this game yet.</div>';
+        return;
+      }
+
+      game.servers.forEach((server, index) => {
+        const card = document.createElement('div');
+        card.className = 'server-card';
+
+        const serverNum = String(index + 1).padStart(2, '0');
+        const status = (server.status || 'AVAILABLE').toUpperCase();
+        const region = server.region || 'Global';
+        const visits = server.visits != null ? server.visits + ' visits' : '';
+        const hasValidLink = isValidServerLink(server.url);
+
+        card.innerHTML = `
+          <div class="server-top">
+            <div class="server-info">
+              <div class="server-num">SERVER ${serverNum}</div>
+              <div class="server-name">${escapeHtml(server.name || 'Server')}</div>
+              <div class="server-desc">${escapeHtml(server.description || '')}</div>
+              <div class="server-badges">
+                <span class="badge region">${escapeHtml(region)}</span>
+                <span class="badge status">${escapeHtml(status)}</span>
+                ${visits ? '<span class="badge visits">' + escapeHtml(visits) + '</span>' : ''}
+              </div>
+            </div>
+          </div>
+          <button class="join-btn" type="button" aria-label="Join ${escapeHtml(server.name || 'server')}">JOIN SERVER →</button>
+        `;
+
+        const joinBtn = card.querySelector('.join-btn');
+        joinBtn.addEventListener('click', () => {
+          joinServer(game, server);
+        });
+
+        list.appendChild(card);
+      });
+          }
+        /* ================================================================
+       JOIN SERVER (loading animation + navigation)
+       ================================================================ */
+    function joinServer(game, server) {
+      // Guard: if already connecting, ignore repeated clicks
+      if (state.isConnecting) return;
+
+      
+
+      state.isConnecting = true;
+
+      const overlay = $('loadingOverlay');
+      $('overlayGameName').textContent = game.title;
+      $('overlayServerName').textContent = server.name;
+      $('progressBar').style.width = '0%';
+      $('progressText').textContent = '0%';
+      $('cancelBtn').style.display = '';
+      overlay.classList.add('active');
+
+      let progress = 0;
+      const totalDuration = 1200; // ms
+      const stepTime = 20;
+      const steps = totalDuration / stepTime;
+      const increment = 100 / steps;
+      let cancelled = false;
+
+      // Cancel handler
+      const cancelHandler = () => {
+        cancelled = true;
+        if (state.loadingTimer) {
+          clearInterval(state.loadingTimer);
+          state.loadingTimer = null;
+        }
+        overlay.classList.remove('active');
+        state.isConnecting = false;
+        $('cancelBtn').removeEventListener('click', cancelHandler);
+      };
+      $('cancelBtn').removeEventListener('click', cancelHandler);
+      $('cancelBtn').addEventListener('click', cancelHandler);
+
+      if (state.loadingTimer) clearInterval(state.loadingTimer);
+      state.loadingTimer = setInterval(() => {
+        progress += increment;
+        if (progress > 100) progress = 100;
+        $('progressBar').style.width = progress + '%';
+        $('progressText').textContent = Math.round(progress) + '%';
+
+        if (progress >= 100) {
+          clearInterval(state.loadingTimer);
+          state.loadingTimer = null;
+
+          if (cancelled) return;
+
+          // Delay a tiny bit then navigate
+          setTimeout(() => {
+            if (cancelled) return;
+            overlay.classList.remove('active');
+            state.isConnecting = false;
+            $('cancelBtn').removeEventListener('click', cancelHandler);
+            // Navigate to the configured Roblox private server link
+            window.open(server.url.trim(), '_blank', 'noopener,noreferrer');
+          }, 150);
+        }
+      }, stepTime);
+    }
+
+    /* ================================================================
+       BACK TO GAMES
+       ================================================================ */
+    function goBack() {
+      // Hide server page, show home
+      $('serverPage').classList.remove('active');
+      $('homePage').classList.remove('hidden');
+      state.currentGame = null;
+      // Re-render games (in case data changed)
+      renderGames();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ================================================================
+       INIT PARTICLES
+       ================================================================ */
+    function initParticles() {
+      const container = $('particles');
+      if (!container) return;
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = Math.random() * 4 + 2;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (Math.random() * 14 + 10) + 's';
+        p.style.animationDelay = (Math.random() * 12) + 's';
+        p.style.opacity = Math.random() * 0.3 + 0.15;
+        container.appendChild(p);
+      }
+    }
+
+    /* ================================================================
+       INIT APP
+       ================================================================ */
+    function init() {
+      renderTitle();
+      renderProfile();
+      renderGames();
+      initParticles();
+
+      // Back button
+      $('backBtn').addEventListener('click', goBack);
+
+      // Cancel button (global)
+      $('cancelBtn').addEventListener('click', () => {
+        if (state.loadingTimer) {
+          clearInterval(state.loadingTimer);
+          state.loadingTimer = null;
+        }
+        $('loadingOverlay').classList.remove('active');
+        state.isConnecting = false;
+      });
+    }
+
+    // Start when DOM ready
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
